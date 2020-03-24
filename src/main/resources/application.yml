@@ -6,7 +6,7 @@ paytm.payment:
     Website: WEBSTAGING
     industryTypeId: Retail
     paytmUrl: https://securegw-stage.paytm.in/order/process
-    callbackUrl: http://localhost:8080/pgresponse
+    callbackUrl: https://zomatoclone.herokuapp.com/pgresponse
     details:
       MID: ${paytm.payment.sandbox.merchantId}
       CHANNEL_ID: ${paytm.payment.sandbox.channelId}
