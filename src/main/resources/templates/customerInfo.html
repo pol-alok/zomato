@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+        integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <!-- Our Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Scrollbar Custom CSS -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+        integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous">
+    </script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+        integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous">
+    </script>
+    <style>
+        .form-group.required .control-label:after {
+            content: "*";
+        }
+        .context-dark,
+        .bg-gray-dark,
+        .bg-primary {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        hr.new {
+            border-top: 1px solid rgb(79, 83, 88);
+        }
+        .footer-classic a,
+        .footer-classic a:focus,
+        .footer-classic a:active {
+            color: #FFFFFF;
+        }
+        .nav-list li {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        .nav-list li a:hover:before {
+            margin-left: 0;
+            opacity: 1;
+            visibility: visible;
+        }
+        ul,
+        ol {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .social-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 23px;
+            font: 900 13px/1 "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+
+    <title>Customer Info</title>
+</head>
+
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+        <h5 class="font-weight-bold"><a href="/showRestaurant" class="text-light">zomato</a></h5>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <a class="row mr-4" sec:authorize="isAuthenticated()" th:href="${'/customerDashBoard/'+customer.getCid()}">
+                    <li class="nav-item active">
+                        <img th:src="${customer.getPicture()}"
+                             onerror="this.src='https://b.zmtcdn.com/images/user_avatars/pizza_2x.png?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A';"
+                             class="rounded-circle" height="40px" width="40px" alt="avatar">
+                    </li>
+                    <li class="nav-item active pr-3">
+                        <span class="nav-link" th:text="${customer.getName()}">username</span>
+                    </li>
+                </a>
+                <div th:if="${#authorization.expression('isAuthenticated()')}">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/logout">Log Out <span class="sr-only">(current)</span></a>
+                    </li>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <li class="nav-item active">
+                        <a class="nav-link" data-toggle="modal" href="" data-target="#modalLRForm">Log In <span class="sr-only">(current)</span></a>
+                    </li>
+                </div>
+
+                <div sec:authorize="!isAuthenticated()">
+                    <li class="nav-item active">
+                        <a class="nav-link" data-toggle="modal" href="" data-target="#modalLRForm" >Create Account <span class="sr-only">(current)</span></a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </nav>
+</header>
+<!---------------------------------------------->
+<div class="modal fade" id="modalLRForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog cascading-modal" role="document">
+        <div class="modal-content">
+            <h4 class="ml-3 mt-3 mb-3">Sign in or log in to Zomato</h4>
+            <div class="modal-c-tabs">
+                <div class="tab-content">
+                    <div class="tab-pane fade in show active" id="panel7" role="tabpanel">
+                        <div class="modal-body mb-1">
+                            <div class="md-form form-sm mb-5">
+                                <label data-error="wrong" data-success="right" for="modalLRInput10"></label>
+                                <a  id="modalLRInput10" href="/oauth2/authorization/google"
+                                    class="form-control form-control-sm validate google text-center text-lg">
+                                    <img  class="left" src="https://b.zmtcdn.com/images/new_google_icon.png"/>
+                                    <p>Continue with Google</p>
+                                </a>
+                            </div>
+                            <h6 class="text-center ">Or use your email address</h6>
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs md-tabs tabs-2 danger darken-3 d-flex justify-content-between"
+                    role="tablist">
+                    <li class="nav-item col-md-6">
+                        <a class="nav-link active btn btn-border btn-lg btn-danger text-light mb-3"
+                           data-toggle="tab" href="#" role="tab">Login</a>
+                    </li>
+                    <li class="nav-item col-md-6">
+                        <a class="nav-link btn rounded border-dark btn-lg mb-3" data-toggle="tab" href="#"
+                           role="tab" >Sign up</a>
+                    </li>
+                    <li class="nav-item cross">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span class="mr-3 mt-3">&times;</span></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <section>
+        <div class="container text-center">
+            <div class="row mt-5 mb-5 text-center">
+                <div class="col-lg-12 col-md-12 col-sm-12 mb-2 text-center">
+                    <div class="card border">
+                        <div class="card-body d-flex flex-row">
+                            <div class="card-body text-right">
+                                <img th:src="${customer.getPicture()}"
+                                     onerror="this.src='https://b.zmtcdn.com/images/user_avatars/pizza_2x.png?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A';"
+                                     class="rounded-circle" height="150px" width="150px" alt="avatar">
+                            </div>
+                            <div class="card-body text-left mt-2">
+                                <h4 class="card-title text-dark" th:text=" ${customer.getName()}">name</h4>
+
+                                <h6 class="text-muted" th:text=" ${customer.getAddress()}"><i class="fas fa-map-marker-alt "></i>&nbsp;Address</h6>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="font-weight-bold text-muted">25 Points to Level Up</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="row mt-5 mb-5">
+                <div class="col-lg-3 col-md-3 col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <img th:src="${customer.getPicture()}"
+                                 onerror="this.src='https://b.zmtcdn.com/images/user_avatars/pizza_2x.png?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A';"
+                                 class="rounded" height="200px" width="200px" alt="avatar">
+                        </div>
+                        <div class="card-footer">
+                            <h6 class="text-muted" th:text="${customer.getName()}">Name</h6>
+                            <p th:text="${customer.getAddress()}"><i class="fas fa-map-marker-alt "></i>&nbsp;Address</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-6 col-sm-12 mb-2">
+                    <h4 class="mb-3">Profile Information</h4>
+                    <div class="card border">
+
+                        <!-- <div class="card-body d-flex flex-row">
+
+                        </div> -->
+                        <form class="mr-2 ml-2" modelAttribute="customer" method="post" action="/updateCustomerInfo">
+                            <div class="form-group required">
+                                <input type="hidden" name="cid" th:value="${customer.getCid()}">
+                                <input type="hidden" name="role" th:value="${customer.getRole()}">
+                                <input type="hidden" name="sub" th:value="${customer.getSub()}">
+                                <input type="hidden" name="picture" th:value="${customer.getPicture()}">
+<!--                                <input type="hidden" name="orderrList" th:value="${customer.getOrderrList()}">-->
+                                <input type="hidden" name="restaurant" th:value="${customer.getRestaurants()}">
+                                <label class="control-label">Your Full Name</label>
+                                <input type="text" class="form-control" required="required" th:value=" ${customer.getName()}"
+                                    id="exampleFormControlInput1"  name="name">
+                            </div>
+                            <div class="form-group mt-3 required">
+                                <label class="control-label" for="exampleFormControlSelect1">Where do you live?</label>
+                                <select class="form-control" required="required" id="exampleFormControlSelect1" name="address">
+                                    <option>Banglore</option>
+                                    <option>Delhi</option>
+                                    <option>Chennai</option>
+                                    <option>Hyderabad</option>
+                                    <option>Noida</option>
+                                </select>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label for="exampleFormControlTextarea1">A little bit about yourself</label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label for="exampleFormControlSelect1">Your preferred language</label>
+                                <select class="form-control" >
+                                    <option>English</option>
+                                    <option>Hindi</option>
+                                </select>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label for="exampleFormControlInput1">Your mobile number</label>
+                                <input type="number" class="form-control"
+                                    placeholder="Your Mobile No." name="phoneNo" th:value="${customer.getPhoneNo()}">
+                            </div>
+                            <label for="exampleFormControlInput1">Your email address</label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control mr-2"  th:value="${customer.getEmail()}" aria-describedby="button-addon2" name="email">
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="button" id="button-addon2">Change</button>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn btn-success w-48" type="submit">save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-12">
+                    <h6 class="mb-3 mt-2">Set Zomato Handle</h6>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>You can now register a short url to your profile. e.g. zomato.com/<span
+                                    class="font-weight-bold">username</span><br>
+                                You can set your profile URL only once.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<footer class="section footer-classic context-dark bg-image" style="background: #2D3246;">
+    <div class="container">
+        <img class="mt-3 rounded" src="https://b.zmtcdn.com/images/logo/zomato_flat_bg_logo.svg"
+             alt="Find the best restaurants, cafés, and bars in Bengaluru" width="60px">
+        <hr class="new">
+        <div class="row row-30">
+            <div class="col-md-4 col-xl-3">
+                <div class="pr-xl-4">
+                    <h5>About Zomato</h5>
+                    <ul class="font-weight-light">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Culture</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
+                <div class="pr-xl-4">
+                    <h5>For Foodies</h5>
+                    <ul class="font-weight-light">
+                        <li><a href="#">Code of Conduct</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Blogger Help</a></li>
+                        <li><a href="#">Developers</a></li>
+                        <li><a href="#">Mobile Apps</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
+                <h5>For Restaurants</h5>
+                <ul class="font-weight-light">
+                    <li><a href="#">Add a Restaurant</a></li>
+                    <li><a href="#">Claim your Listing</a></li>
+                    <li><a href="#">Business App</a></li>
+                    <li><a href="#">Business Owner Guidelines</a></li>
+                    <li><a href="#">Business Blog</a></li>
+                    <li><a href="#">Restaurant Widgets</a></li>
+                    <li><a href="#">Products for Businesses</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 col-xl-3 mt-5 font-weight-light">
+                <ul>
+                    <li><a href="#">Advertise</a></li>
+                    <li><a href="#">Order</a></li>
+                    <li><a href="#">Book</a></li>
+                    <li><a href="#">Trace</a></li>
+                    <li><a href="#">Hyperpure</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="new">
+        <div class="row row-30">
+            <div class="col-md-3 col-xl-3">
+                <div class="pr-xl-3">
+                    <h5>Countries</h5>
+                    <ul class="font-weight-light">
+                        <li><a href="#">Australia</a></li>
+                        <li><a href="#">Brasil</a></li>
+                        <li><a href="#">Canada</a></li>
+                        <li><a href="#">Chile</a></li>
+                        <li><a href="#">Czech Republic</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-3 col-xl-2 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">India</a></li>
+                    <li><a href="#">Indonesia</a></li>
+                    <li><a href="#">Ireland</a></li>
+                    <li><a href="#">Italy</a></li>
+                    <li><a href="#">Lebanon</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-xl-2 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">Malaysia</a></li>
+                    <li><a href="#">New Zealand</a></li>
+                    <li><a href="#">Philippines</a></li>
+                    <li><a href="#">Poland</a></li>
+                    <li><a href="#">Portugal</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-xl-2 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">Qatar</a></li>
+                    <li><a href="#">Singapore</a></li>
+                    <li><a href="#">Slovakia</a></li>
+                    <li><a href="#">South Africa</a></li>
+                    <li><a href="#">Sri Lanka</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 col-xl-3 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">Turkey</a></li>
+                    <li><a href="#">UAE</a></li>
+                    <li><a href="#">United Kingdom</a></li>
+                    <li><a href="#">United States</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="new">
+        <p class="mb-0 small text-muted">
+            By continuing past this page, you agree to our Terms of Service, Cookie Policy, Privacy Policy and
+            Content Policies. All trademarks are properties of their respective owners. © 2008-2020 - Zomato™ Media
+            Pvt Ltd. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Josefin+Slab&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+            integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous">
+    </script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+            integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous">
+    </script>
+    <title>Restaurant Online Order</title>
+<!--    <link th:href="@{/css/singleResto.css.css}" rel="stylesheet" type="text/css" />-->
+    <style>
+        .checked {
+            color: orange;
+            font-size: 10px;
+        }
+
+        .unstar {
+            font-size: 10px;
+        }
+
+        [class*="item-manage"] {
+            display: none;
+        }
+
+        [class*="add-btn"] {
+            display: none;
+        }
+
+        .min-add-button {
+            width: 120px;
+            margin: 10px auto;
+        }
+
+        .min-add-button .minus {
+            background: #e6ffe6;
+            padding: 10px;
+            height: 40px;
+            border-radius: 5px 0px 0px 0px;
+            border-left: 1px solid #999999;
+            border-top: 1px solid #999999;
+            border-bottom: 1px solid #999999;
+        }
+
+        .min-add-button .plus {
+            background: #e6ffe6;
+            padding: 10px;
+            height: 40px;
+            border-radius: 0 0 5px 0;
+            border: 1px solid #999999;
+
+        }
+
+        .plus:hover {
+            background: #b3ffb3;
+            cursor: pointer;
+        }
+
+        .minus:hover {
+            background: #b3ffb3;
+            cursor: pointer;
+        }
+
+        .min-add-button input {
+            height: 40px;
+            text-align: center;
+            border: none;
+            font-weight: 400;
+            padding: 5px;
+            color: #FFFFFF;
+        }
+
+        .cart {
+            position: absolute;
+            right: 0;
+        }
+        .sticky {
+            position: fixed;
+            top: 0;
+            z-index: 2;
+            width: 100%;
+        }
+        .stickySearch {
+            transition: all 0.5s ease-in;
+        }
+        .context-dark,
+        .bg-gray-dark,
+        .bg-primary {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        hr.new {
+            border-top: 1px solid rgb(79, 83, 88);
+        }
+        .footer-classic a,
+        .footer-classic a:focus,
+        .footer-classic a:active {
+            color: #FFFFFF;
+        }
+        .nav-list li {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        .nav-list li a:hover:before {
+            margin-left: 0;
+            opacity: 1;
+            visibility: visible;
+        }
+        ul,
+        ol {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .social-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 23px;
+            font: 900 13px/1 "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+    <script>
+        let foods = [];
+        let grandTotal = 0;
+
+        function addItemToCart(id) {
+
+            const foodName = document.getElementById("nameOfFood" + id);
+            const price = document.getElementById("price" + id);
+            const type = document.getElementById("type" + id);
+            const food = {
+                "foodId": id,
+                "name": foodName.innerHTML,
+                "price": price.innerHTML,
+                "total": price.innerHTML,
+                "noOfItem": 1,
+                "type":type.value
+            };
+            foods.unshift(food);
+            displayItems();
+            calGrandTotal();
+        }
+        function displayItems() {
+            const dynamicList = document.getElementById("dynamic-row");
+            dynamicList.innerHTML = "";
+            foods.forEach(function (food) {
+                dynamicList.innerHTML += "<div>" +
+                    "    <div class='card-body'>" +
+                    "        <div class='nveg tag left' style='display: inline'>" +
+                    "            <i class='fa fa-plus-square text-success' aria-hidden='true'></i>" +
+                    "        </div>" +
+                    "        <div class='name' style='font-size: 16px; margin-left: 22px; width: auto; display: inline' >" +
+                    food.name +
+                    "        </div>" +
+                    "        <div class='min-add-button'>" +
+                    "            <div class='input-group'>" +
+                    "                <button onclick='sub(" + food.foodId + ");'" + " class='input-group-addon minus increment'><i" +
+                    "                        class='fa fa-minus' aria-hidden='true'></i></button>" +
+                    "                <input type='text' class='form-control btn-success' size='10' value=" + food.noOfItem + ">" +
+                    "                <button onclick='" + "add(" + food.foodId + ");'" + " class='input-group-addon plus increment'><i class='fa fa-plus' aria-hidden='true'></i></button>" +
+                    "            </div>" +
+                    "        </div>" +
+                    "        <div class='row'>" +
+                    "            <div class='col-md-4'>" +
+                    "                <span >Unit Price</span>" +
+                    "            </div>" +
+                    "            <div class='col-md-8'>" +
+                    "            <div class='row'>" +
+                    "            <div class='col-md-6'>" +
+                    "                <span id='" + "single-price" + food.foodId + "'>₹" + food.price + "</span>" +
+                    "            </div>" +
+                    "            <div class='col-md-6'>" +
+                    "                 <span>₹</span><span id='" + "cal-price" + food.foodId + "'>" + food.total + "</span>" +
+                    "            </div>" +
+                    "            </div>" +
+                    "        </div>" +
+                    "    </div>" +
+                    "    <hr>" +
+                    "</div>";
+            });
+
+        }
+        function toggleButtonOfFood(id) {
+            let food = foods.filter(el => el.foodId === id);
+            let  a = "<div id='3-btn-"+id+"'>" +
+                "    <div class='card-body'>" +
+                "        <div class='nveg tag left' style='display: inline'>" +
+                "            <i class='fa fa-plus-square text-success' aria-hidden='true'></i>" +
+                "        </div>" +
+                "        <div class='name' style='font-size: 16px; margin-left: 22px; width: auto; display: inline' >" +
+                food.name +
+                "        </div>" +
+                "        <div class='min-add-button'>" +
+                "            <div class='input-group'>" +
+                "                <button onclick='sub(" + food.foodId + ");'" + " class='input-group-addon minus increment'><i" +
+                "                        class='fa fa-minus' aria-hidden='true'></i></button>" +
+                "                <input type='text' class='form-control btn-success' size='10' value=" + food.noOfItem + ">" +
+                "                <button onclick='" + "add(" + food.foodId + ");'" + " class='input-group-addon plus increment'><i class='fa fa-plus' aria-hidden='true'></i></button>" +
+                "            </div>" +
+                "        </div>" +
+                "        <div class='row'>" +
+                "            <div class='col-md-4'>" +
+                "                <span >Unit Price</span>" +
+                "            </div>" +
+                "            <div class='col-md-8'>" +
+                "            <div class='row'>" +
+                "            <div class='col-md-6'>" +
+                "                <span id='" + "single-price" + food.foodId + "'>₹" + food.price + "</span>" +
+                "            </div>" +
+                "            <div class='col-md-6'>" +
+                "                 <span>₹</span><span id='" + "cal-price" + food.foodId + "'>" + food.total + "</span>" +
+                "            </div>" +
+                "            </div>" +
+                "        </div>" +
+                "    </div>" +
+                "    <hr>" +
+                "</div>";
+            let b = "    <div class='card-body'>" +
+                "        <div class='nveg tag left' style='display: inline'>" +
+                "            <i class='fa fa-plus-square text-success' aria-hidden='true'></i>" +
+                "        </div>" +
+                "        <div class='name' style='font-size: 16px; margin-left: 22px; width: auto; display: inline' >" +
+                food.name +
+                "        </div>" +
+                "        <div class='min-add-button'>" +
+                "            <div class='input-group'>" +
+                "                <button onclick='sub(" + food.foodId + ");'" + " class='input-group-addon minus increment'><i" +
+                "                        class='fa fa-minus' aria-hidden='true'></i></button>" +
+                "                <input type='text' class='form-control btn-success' size='10' value=" + food.noOfItem + ">" +
+                "                <button onclick='" + "add(" + food.foodId + ");'" + " class='input-group-addon plus increment'><i class='fa fa-plus' aria-hidden='true'></i></button>" +
+                "            </div>" +
+                "        </div>" +
+                "        <div class='row'>" +
+                "            <div class='col-md-4'>" +
+                "                <span style='text-decoration: line-through;'>₹ 555.709</span>" +
+                "            </div>" +
+                "            <div class='col-md-8'>" +
+                "            <div class='row'>" +
+                "            <div class='col-md-6'>" +
+                "                <span id='" + "single-price" + food.foodId + "'>₹" + food.price + "</span>" +
+                "            </div>" +
+                "            <div class='col-md-6'>" +
+                "                 <span>₹</span><span id='" + "cal-price" + food.foodId + "'>" + food.total + "</span>" +
+                "            </div>" +
+                "            </div>" +
+                "        </div>" +
+                "    </div>" +
+                "    <hr>";
+            const btn = document.getElementById("add-btn"+id);
+            const tripletsBtn =document.getElementById('3-btn'+id);
+            if (tripletsBtn) {
+
+                document.getElementById("3-btn-"+id).innerHTML = b;
+            }
+            else  {
+                btn.innerHTML+=a;
+            }
+
+        }
+
+        function calGrandTotal() {
+            grandTotal = foods.reduce((a, c) => {
+                return a + parseFloat(c.total);
+            }, 0);
+            document.getElementById('grand').innerHTML = grandTotal;
+            grandTotal = 0;
+        }
+
+        function storeArrayInHiddenForm() {
+            const form = document.getElementById("list");
+            if (form.getElementsByTagName("input").length === 0) {
+                foods.forEach(function (food) {
+                    document.getElementById("list").innerHTML +=
+                        "<input type='hidden' name='id' value='" + food.foodId + "'>" +
+                        "<input type='hidden' name='name' value='" + food.name + "'>" +
+                        "<input type='hidden' name='price' value='" + food.price + "'>" +
+                        "<input type='hidden' name='noOfItem' value='" + food.noOfItem + "'>" +
+                        "<input type='hidden' name='total' value='" + food.total + "'>"+
+                        "<input type='hidden' name='type' value='" + food.type + "'>";
+                });
+            }
+            changePropertyOfConformButton();
+        }
+
+        function changePropertyOfConformButton() {
+            let button = document.getElementById("btn-conformation");
+            button.removeAttribute("onclick");
+            button.setAttribute("type", "submit");
+            button.innerHTML = "Continue";
+            button.classList.remove('btn-warning');
+            button.classList.add('btn-success');
+        }
+
+        function add(id) {
+            foods.filter(food => {
+                if (food.foodId === id) {
+                    food.noOfItem++;
+                    food.total = food.price * food.noOfItem;
+                    grandTotal = grandTotal + food.total;
+                }
+            });
+            displayItems();
+            calGrandTotal();
+        }
+
+        function sub(id) {
+            foods.filter(food => {
+                if (food.foodId === id) {
+                    food.noOfItem--;
+                    food.total = food.price * food.noOfItem;
+                }
+                if (food.noOfItem < 1) {
+                    document.getElementById('add-btn' + id).classList.remove('add-btn' + id);
+                }
+            });
+            foods = foods.filter(el => el.noOfItem !== 0);
+            displayItems();
+            calGrandTotal();
+        }
+
+
+
+
+        function addItem(addBtn) {
+            document.getElementById(addBtn).classList.add(addBtn);
+        }
+    </script>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+        <h5 class="font-weight-bold"><a href="/showRestaurant" class="text-light">zomato</a></h5>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <a class="row mr-4" sec:authorize="isAuthenticated()" th:href="${'/customerDashBoard/'+customer.getCid()}">
+                    <li class="nav-item active">
+                        <img th:src="${customer.getPicture()}"
+                             onerror="this.src='https://b.zmtcdn.com/images/user_avatars/pizza_2x.png?fit=around%7C200%3A200&crop=200%3A200%3B%2A%2C%2A';"
+                             class="rounded-circle" height="40px" width="40px" alt="avatar">
+                    </li>
+                    <li class="nav-item active pr-3">
+                        <span class="nav-link" th:text="${customer.getName()}">username</span>
+                    </li>
+                </a>
+                <div th:if="${#authorization.expression('isAuthenticated()')}">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/logout">Log Out <span class="sr-only">(current)</span></a>
+                    </li>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <li class="nav-item active">
+                        <a class="nav-link" data-toggle="modal" href="" data-target="#modalLRForm">Log In <span class="sr-only">(current)</span></a>
+                    </li>
+                </div>
+
+                <div sec:authorize="!isAuthenticated()">
+                    <li class="nav-item active">
+                        <a class="nav-link" data-toggle="modal" href="" data-target="#modalLRForm" >Create Account <span class="sr-only">(current)</span></a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </nav>
+</header>
+<!---------------------------------------------->
+<div class="modal fade" id="modalLRForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog cascading-modal" role="document">
+        <div class="modal-content">
+            <h4 class="ml-3 mt-3 mb-3">Sign in or log in to Zomato</h4>
+            <div class="modal-c-tabs">
+                <div class="tab-content">
+                    <div class="tab-pane fade in show active" id="panel7" role="tabpanel">
+                        <div class="modal-body mb-1">
+                            <div class="md-form form-sm mb-5">
+                                <label data-error="wrong" data-success="right" for="modalLRInput10"></label>
+                                <a  id="modalLRInput10" href="/oauth2/authorization/google"
+                                    class="form-control form-control-sm validate google text-center text-lg">
+                                    <img  class="left" src="https://b.zmtcdn.com/images/new_google_icon.png"/>
+                                    <p>Continue with Google</p>
+                                </a>
+                            </div>
+                            <h6 class="text-center ">Or use your email address</h6>
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs md-tabs tabs-2 danger darken-3 d-flex justify-content-between"
+                    role="tablist">
+                    <li class="nav-item col-md-6">
+                        <a class="nav-link active btn btn-border btn-lg btn-danger text-light mb-3"
+                           data-toggle="tab" href="#" role="tab">Login</a>
+                    </li>
+                    <li class="nav-item col-md-6">
+                        <a class="nav-link btn rounded border-dark btn-lg mb-3" data-toggle="tab" href="#"
+                           role="tab" >Sign up</a>
+                    </li>
+                    <li class="nav-item cross">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span class="mr-3 mt-3">&times;</span></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<section>
+    <div class="container">
+        <div class="row mt-5 mb-5">
+            <div class="col-lg-8 col-md-8 col-sm-12 mb-2">
+                <div class="card border  singleRestaurant mb-5 border-dark">
+                    <div class="card-body d-flex flex-row">
+                        <div>
+                            <p class="text-muted">ORDER FOOD ONLINE FROM</p>
+                            <h2 class="card-title font-weight-bold text-dark" th:text="${singleRestaurant.getName()}">Fresh Menu</h2>
+                            <p class="text-muted" style="float: left;" th:text="${singleRestaurant.getCity()}">Address </p>
+                            <p class="text-muted" style="float: right;"> • Costs ₹ 300 for two</p>
+                        </div>
+                    </div>
+                    <div class="container-fluid">
+                        <div class="row border">
+                            <div class="col-sm-3 col-md-6 col-lg-3 border text-center">
+                                <p class="text-muted">Delivery Time<br><span class="font-weight-bold">50 mins</span>
+                                </p>
+                            </div>
+                            <div class="col-sm-3 col-md-6 col-lg-3 border text-center">
+                                <p class="text-muted">Minimum Order<br><span class="font-weight-bold">₹ <span th:text="${singleRestaurant.getMinPrice()}"></span></span>
+                                </p>
+                            </div>
+                            <div class="col-sm-3 col-md-6 col-lg-3 border text-center">
+                                <p class="text-muted">Payment Methods<br><span th:text="${singleRestaurant.getPayments()}" class="font-weight-bold">Cash&Online</span></p>
+                            </div>
+                            <div class="col-sm-3 col-md-6 col-lg-3 border text-center">
+                                <p class="text-muted">Recent Order</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="items card mt-2" th:each="food: ${singleRestaurant.getFoods()}">
+                    <div class="card-body d-flex flex-row">
+                        <img src="https://mdbootstrap.com/img/Photos/Horizontal/Food/8-col/img (5).jpg"
+                             class="rounded mr-3" height="90px" width="90px"
+                             alt="avatar">
+                        <div class="card-body">
+                            <h6 class="card-title font-weight-bold mb-2 text-dark"
+                                th:id="'nameOfFood' + ${food.getFoodId()}" th:text="${food.getFoodName()}">Salad</h6>
+                            <span class="fa fa-star checked mb-2"></span>
+                            <span class="fa fa-star checked mb-2"></span>
+                            <span class="fa fa-star checked mb-2"></span>
+                            <span class="fa fa-star-half checked mb-2"></span>
+                            <span class="fa fa-star unstar mb-2"></span>
+                            <p class="card-text text-muted mt-2" >₹ <span th:id="'price' + ${food.getFoodId()}" th:text="${food.getFoodPrice()}"></span></p>
+                            <input type="hidden" th:id="'type' + ${food.getFoodId()}" th:value="${food.getVeg()}" >
+                        </div>
+                        <!--                        <div th:class="'item-manage' + ${food.getFoodId()}" th:id="'item-manage' + ${food.getFoodId()}">-->
+                        <!--                            <div class="min-add-button">-->
+                        <!--                                <div class="input-group">-->
+                        <!--                                    <button th:onclick="'sub('+'\'item-manage'+${food.getFoodId()}+'\',\'add-btn'+${food.getFoodId()}+'\');'" class="input-group-addon minus increment"><i-->
+                        <!--                                            class="fa fa-minus" aria-hidden="true"></i></button>-->
+
+                        <!--                                    <input type="text" class="form-control btn-success" size="10" th:id="'val' + ${food.getFoodId()}" value="1">-->
+
+                        <!--                                    <button onclick="add()" class="input-group-addon plus increment"><i-->
+                        <!--                                            class="fa fa-plus" aria-hidden="true"></i></button>-->
+                        <!--                                </div>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
+                        <div class="text-right mt-3" th:id="'add-btn' + ${food.getFoodId()}">
+                            <a class="btn btn-outline-success"
+                               th:onclick="'addItem(\'add-btn'+${food.getFoodId()}+'\');'+'addItemToCart('+${food.getFoodId()}+');'">Add</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 cart" id="searchbox">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-header">
+                            <h4>Your Orders</h4>
+                        </div>
+                    </div>
+                    <div id="dynamic-row" class="overflow-auto" style="height: 350px">
+
+                    </div>
+                    <div class="card-footer">
+                        <span>Grand Subtotal : ₹</span>&nbsp;&nbsp;&nbsp;<span id="grand"></span>
+                    </div>
+                    <form id="list"  th:action="@{/payment/{id}(id=${singleRestaurant.getId()})}" method="post">
+
+                        <div class="card-footer">
+                            <button class="btn btn-warning w-100" id="btn-conformation"
+                                    onclick="storeArrayInHiddenForm()">Confirm
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<footer class="section footer-classic context-dark bg-image" style="background: #2D3246;">
+    <div class="container">
+        <img class="mt-3 rounded" src="https://b.zmtcdn.com/images/logo/zomato_flat_bg_logo.svg"
+             alt="Find the best restaurants, cafés, and bars in Bengaluru" width="60px">
+        <hr class="new">
+        <div class="row row-30">
+            <div class="col-md-4 col-xl-3">
+                <div class="pr-xl-4">
+                    <h5>About Zomato</h5>
+                    <ul class="font-weight-light">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Culture</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
+                <div class="pr-xl-4">
+                    <h5>For Foodies</h5>
+                    <ul class="font-weight-light">
+                        <li><a href="#">Code of Conduct</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Blogger Help</a></li>
+                        <li><a href="#">Developers</a></li>
+                        <li><a href="#">Mobile Apps</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
+                <h5>For Restaurants</h5>
+                <ul class="font-weight-light">
+                    <li><a href="#">Add a Restaurant</a></li>
+                    <li><a href="#">Claim your Listing</a></li>
+                    <li><a href="#">Business App</a></li>
+                    <li><a href="#">Business Owner Guidelines</a></li>
+                    <li><a href="#">Business Blog</a></li>
+                    <li><a href="#">Restaurant Widgets</a></li>
+                    <li><a href="#">Products for Businesses</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 col-xl-3 mt-5 font-weight-light">
+                <ul>
+                    <li><a href="#">Advertise</a></li>
+                    <li><a href="#">Order</a></li>
+                    <li><a href="#">Book</a></li>
+                    <li><a href="#">Trace</a></li>
+                    <li><a href="#">Hyperpure</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="new">
+        <div class="row row-30">
+            <div class="col-md-3 col-xl-3">
+                <div class="pr-xl-3">
+                    <h5>Countries</h5>
+                    <ul class="font-weight-light">
+                        <li><a href="#">Australia</a></li>
+                        <li><a href="#">Brasil</a></li>
+                        <li><a href="#">Canada</a></li>
+                        <li><a href="#">Chile</a></li>
+                        <li><a href="#">Czech Republic</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-3 col-xl-2 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">India</a></li>
+                    <li><a href="#">Indonesia</a></li>
+                    <li><a href="#">Ireland</a></li>
+                    <li><a href="#">Italy</a></li>
+                    <li><a href="#">Lebanon</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-xl-2 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">Malaysia</a></li>
+                    <li><a href="#">New Zealand</a></li>
+                    <li><a href="#">Philippines</a></li>
+                    <li><a href="#">Poland</a></li>
+                    <li><a href="#">Portugal</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-xl-2 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">Qatar</a></li>
+                    <li><a href="#">Singapore</a></li>
+                    <li><a href="#">Slovakia</a></li>
+                    <li><a href="#">South Africa</a></li>
+                    <li><a href="#">Sri Lanka</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 col-xl-3 mt-4 font-weight-light">
+                <ul>
+                    <li><a href="#">Turkey</a></li>
+                    <li><a href="#">UAE</a></li>
+                    <li><a href="#">United Kingdom</a></li>
+                    <li><a href="#">United States</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="new">
+        <p class="mb-0 small text-muted">
+            By continuing past this page, you agree to our Terms of Service, Cookie Policy, Privacy Policy and
+            Content Policies. All trademarks are properties of their respective owners. © 2008-2020 - Zomato™ Media
+            Pvt Ltd. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    window.onscroll = function () {
+        fixSearch();
+    }
+    let searchbox = document.getElementById('searchbox');
+    let sticky = searchbox.offsetTop;
+    function fixSearch() {
+        if (window.pageYOffset > sticky) {
+            searchbox.classList.add('sticky');
+        } else {
+            searchbox.classList.remove('sticky');
+        }
+    }
+    </script>
+</body>
+
+</html>
