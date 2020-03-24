@@ -24,7 +24,7 @@ public class CustomerOIdUserService extends OidcUserService {
         Customer customer =new Customer();
         customer.setPicture(""+attributes.get("picture"));
         customer.setSub(""+attributes.get("sub"));
-        customer.setRole("customer");
+        customer.setRole("restaurant");
         customer.setEmail(""+attributes.get("email"));
         customer.setName(""+attributes.get("name"));
         updateUser(customer);
